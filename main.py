@@ -34,3 +34,19 @@ await page.locator('[id="oc_loader"]').wait_for(state="hidden")
 print("finished")
 
 # %%
+await page.locator("table").locator("tbody").locator("tr").nth(1).locator("a").click()
+
+# %%
+await page.get_by_text("Plan studiów").click()
+
+# %%
+# Start waiting for the download
+async with page.expect_download() as download_info:
+    # Perform the action that initiates download
+    await page.get_by_text("Eksportuj do CSV").first.click()
+download = await download_info.value
+
+# Wait for the download process to complete and save the downloaded file somewhere
+await download.save_as("./downloads/" + download.suggested_filename)
+
+# %%
