@@ -5,7 +5,7 @@ description = "Default template for PDM package"
 authors = [
     {name = "pkb-pmj", email = "pkb.pmj@gmail.com"},
 ]
-dependencies = []
+dependencies = ["beautifulsoup4>=4.13.5"]
 requires-python = "==3.13.*"
 readme = "README.md"
 license = {text = "MIT"}
