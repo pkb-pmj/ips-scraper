@@ -90,26 +90,31 @@ cols = df.loc[:, :"Kod"].columns
 df[cols] = df[cols].fillna("").astype(str)
 
 # %%
-await page.locator('[data-original-title="Wydruk sylabusa"]').first.click()
-await page.get_by_text("Generuj raport").wait_for(state="visible")
+async def download_syllabus(code: str):
+    await page.locator("tr").filter(has_text=code).locator('[data-original-title="Wydruk sylabusa"]').click()
+    await page.get_by_text("Generuj raport").wait_for(state="visible")
+
+    await page.get_by_label("Część").select_option(label="Część I")
+    await page.get_by_label("Język").select_option(label="polski")
+    async with page.expect_download() as download_info:
+        await page.get_by_text("Generuj raport").click()
+    download = await download_info.value
+    filepath = "./downloads/sylabus/" + code + ".pdf"
+    await download.save_as(filepath)
+    await page.get_by_text("×").filter(visible=True).click()
 
 # %%
-await page.get_by_label("Część").select_option(label="Część I")
-await page.get_by_label("Język").select_option(label="polski")
-async with page.expect_download() as download_info:
-    await page.get_by_text("Generuj raport").click()
-download = await download_info.value
-filepath = "./downloads/" + download.suggested_filename
-await download.save_as(filepath)
+def extract_effects_from_syllabus(code: str):
+    filepath = "./downloads/sylabus/" + code + ".pdf"
+    with pdfplumber.open(filepath) as pdf:
+        tables = [t for p in pdf.pages for t in p.extract_tables()]
+    effects = set(e for t in tables for r in t if r[0] == "Powiązane kierunkowe efekty uczenia się" for e in r[-1].split(", "))
+    return effects
 
 # %%
-await page.get_by_text("×").filter(visible=True).click()
-
-# %%
-with pdfplumber.open(filepath) as pdf:
-    tables = [t for p in pdf.pages for t in p.extract_tables()]
-
-# %%
-effects = set(e for t in tables for r in t if r[0] == "Powiązane kierunkowe efekty uczenia się" for e in r[-1].split(", "))
+for code in df["Kod"][df["Kod"] != ""]:
+    await download_syllabus(code)
+    effects = extract_effects_from_syllabus(code)
+    print(code, effects)
 
 # %%
