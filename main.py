@@ -1,5 +1,7 @@
 # %%
 from playwright.async_api import async_playwright
+import pandas as pd
+import io
 
 # %%
 playwright = await async_playwright().start()
@@ -47,6 +49,43 @@ async with page.expect_download() as download_info:
 download = await download_info.value
 
 # Wait for the download process to complete and save the downloaded file somewhere
-await download.save_as("./downloads/" + download.suggested_filename)
+filepath = "./downloads/" + download.suggested_filename
+await download.save_as(filepath)
+
+# %%
+with open(filepath, "r", encoding="windows-1250") as f:
+    text = f.read()
+
+# %%
+blocks = text.split("Sem: ")
+
+# %%
+course = blocks[0].strip().removesuffix(";")
+
+# %%
+block = blocks[2]
+lines = [l.replace("\n", " ") for l in block.split(";\n")]
+
+# %%
+sem_num = int(lines[0].split()[0])
+sem_code = lines[0].split()[1].strip()
+
+# %%
+start_idx = next(i for i, l in enumerate(lines) if l.startswith("Blok;"))
+end_idx = next(i for i, l in enumerate(lines) if "SUMA" in l)
+
+# %%
+csv_chunk = "\n".join(lines[start_idx:end_idx+1])
+
+# %%
+df = pd.read_csv(io.StringIO(csv_chunk), sep=";")
+
+# %%
+cols = df.loc[:, "Ects":"Suma"].columns
+df[cols]= df[cols].fillna(0).astype(int)
+
+# %%
+cols = df.loc[:, :"Kod"].columns
+df[cols] = df[cols].fillna("").astype(str)
 
 # %%
