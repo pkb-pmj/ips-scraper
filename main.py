@@ -2,6 +2,7 @@
 from playwright.async_api import async_playwright
 import pandas as pd
 import io
+import pdfplumber
 
 # %%
 playwright = await async_playwright().start()
@@ -103,5 +104,14 @@ await download.save_as(filepath)
 
 # %%
 await page.get_by_text("×").filter(visible=True).click()
+
+# %%
+pdf = pdfplumber.open(filepath)
+
+# %%
+tables = [p.extract_table() for p in pdf.pages]
+
+# %%
+effects = set(e for t in tables for r in t if r[0] == "Powiązane kierunkowe efekty uczenia się" for e in r[-1].split(", "))
 
 # %%
