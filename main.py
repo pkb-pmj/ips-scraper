@@ -106,10 +106,8 @@ await download.save_as(filepath)
 await page.get_by_text("×").filter(visible=True).click()
 
 # %%
-pdf = pdfplumber.open(filepath)
-
-# %%
-tables = [p.extract_table() for p in pdf.pages]
+with pdfplumber.open(filepath) as pdf:
+    tables = [t for p in pdf.pages for t in p.extract_tables()]
 
 # %%
 effects = set(e for t in tables for r in t if r[0] == "Powiązane kierunkowe efekty uczenia się" for e in r[-1].split(", "))
