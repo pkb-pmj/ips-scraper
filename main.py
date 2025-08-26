@@ -57,25 +57,25 @@ with open(filepath, "r", encoding="windows-1250") as f:
     text = f.read()
 
 # %%
-blocks = text.split("Sem: ")
+lines = text.split(";\n")
 
 # %%
-course = blocks[0].strip().removesuffix(";")
+breakpoints = [i for i, l in enumerate(lines) if l.endswith('\n')]
+blocks = [lines[i + 1:j] for i, j in zip(breakpoints, breakpoints[1:] + [len(lines)])]
+headers = [lines[i] for i in breakpoints]
+course = lines[0].strip()
 
 # %%
-block = blocks[2]
-lines = [l.replace("\n", " ") for l in block.split(";\n")]
+block = blocks[1]
+header = headers[1]
+lines = [l.replace("\n", " ") for l in block]
 
 # %%
-sem_num = int(lines[0].split()[0])
-sem_code = lines[0].split()[1].strip()
+sem_num = int(header.split()[1])
+sem_code = header.split()[2].strip()
 
 # %%
-start_idx = next(i for i, l in enumerate(lines) if l.startswith("Blok;"))
-end_idx = next(i for i, l in enumerate(lines) if "SUMA" in l)
-
-# %%
-csv_chunk = "\n".join(lines[start_idx:end_idx+1])
+csv_chunk = "\n".join(lines)
 
 # %%
 df = pd.read_csv(io.StringIO(csv_chunk), sep=";")
