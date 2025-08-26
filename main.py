@@ -116,5 +116,38 @@ for code in df["Kod"][df["Kod"] != ""]:
     await download_syllabus(code)
     effects = extract_effects_from_syllabus(code)
     print(code, effects)
+    df.loc[df["Kod"] == code, "Efekty uczenia"] = [effects]
 
+# %%
+def expand_effects(effects: set[str]):
+    if not isinstance(effects, set):
+        return [""] * 12
+    
+    effects = [e.split("_", 1)[1] for e in effects]
+
+    w, u, k = [], [], []
+    for e in effects:
+        if e.startswith("W"):
+            w.append(e)
+        elif e.startswith("U"):
+            u.append(e)
+        elif e.startswith("K"):
+            k.append(e)
+
+    def ensure_length(lst: list[str], length: int):
+        if len(lst) > length:
+            lst = lst[:length - 1] + [", ".join(lst[length - 1:])]
+        elif len(lst) < length:
+            lst += [""] * (length - len(lst))
+        return lst
+
+    w = ensure_length(sorted(w), 4)
+    u = ensure_length(sorted(u), 4)
+    k = ensure_length(sorted(k), 4)
+
+    return w + u + k
+
+# %%
+effect_columns = ["W1", "W2", "W3", "W4", "U1", "U2", "U3", "U4", "K1", "K2", "K3", "K4"]
+df[effect_columns] = df["Efekty uczenia"].apply(expand_effects).tolist()
 # %%
