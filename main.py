@@ -89,3 +89,19 @@ cols = df.loc[:, :"Kod"].columns
 df[cols] = df[cols].fillna("").astype(str)
 
 # %%
+await page.locator('[data-original-title="Wydruk sylabusa"]').first.click()
+await page.get_by_text("Generuj raport").wait_for(state="visible")
+
+# %%
+await page.get_by_label("Część").select_option(label="Część I")
+await page.get_by_label("Język").select_option(label="polski")
+async with page.expect_download() as download_info:
+    await page.get_by_text("Generuj raport").click()
+download = await download_info.value
+filepath = "./downloads/" + download.suggested_filename
+await download.save_as(filepath)
+
+# %%
+await page.get_by_text("×").filter(visible=True).click()
+
+# %%
