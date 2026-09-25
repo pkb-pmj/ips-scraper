@@ -67,8 +67,8 @@ headers = [lines[i] for i in breakpoints]
 course = lines[0].strip()
 
 # %%
-block = blocks[1]
-header = headers[1]
+block = blocks[3]
+header = headers[3]
 lines = [l.replace("\n", " ") for l in block]
 
 # %%
@@ -108,7 +108,7 @@ def extract_effects_from_syllabus(code: str):
     filepath = "./downloads/sylabus/" + code + ".pdf"
     with pdfplumber.open(filepath) as pdf:
         tables = [t for p in pdf.pages for t in p.extract_tables()]
-    effects = set(e for t in tables for r in t if r[0] == "Powiązane kierunkowe efekty uczenia się" for e in r[-1].split(", "))
+    effects = set(e.strip() for t in tables for r in t if r[0] == "Powiązane kierunkowe efekty uczenia się" for e in r[-1].split(","))
     return effects
 
 # %%
@@ -136,7 +136,10 @@ def expand_effects(effects: set[str]):
 
     def ensure_length(lst: list[str], length: int):
         if len(lst) > length:
-            lst = lst[:length - 1] + [", ".join(lst[length - 1:])]
+            lst = [" ".join(lst[0::4]),
+                   " ".join(lst[1::4]),
+                   " ".join(lst[2::4]),
+                   " ".join(lst[3::4])]
         elif len(lst) < length:
             lst += [""] * (length - len(lst))
         return lst
@@ -150,4 +153,6 @@ def expand_effects(effects: set[str]):
 # %%
 effect_columns = ["W1", "W2", "W3", "W4", "U1", "U2", "U3", "U4", "K1", "K2", "K3", "K4"]
 df[effect_columns] = df["Efekty uczenia"].apply(expand_effects).tolist()
+# %%
+df.loc[df["Kod"] != "", ["Kod", "Nazwa", "Ects", "WYK", "CWI", "LAB", "PRO", "W1", "W2", "W3", "W4", "U1", "U2", "U3", "U4", "K1", "K2", "K3", "K4"]].to_csv("output.csv", index=False, header=False)
 # %%
