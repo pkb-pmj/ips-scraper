@@ -82,6 +82,13 @@ csv_chunk = "\n".join(lines)
 df = pd.read_csv(io.StringIO(csv_chunk), sep=";")
 
 # %%
+main_cols = ["Kod", "Nazwa", "Ects", "WYK", "CWI", "LAB", "PRO"]
+main_col_fill = [""]*2 + [0]*5
+for c, f in zip(main_cols, main_col_fill):
+    if c not in df.columns:
+        df[c] = f
+
+# %%
 cols = df.loc[:, "Ects":"Suma"].columns
 df[cols]= df[cols].fillna(0).astype(int)
 
@@ -154,5 +161,5 @@ def expand_effects(effects: set[str]):
 effect_columns = ["W1", "W2", "W3", "W4", "U1", "U2", "U3", "U4", "K1", "K2", "K3", "K4"]
 df[effect_columns] = df["Efekty uczenia"].apply(expand_effects).tolist()
 # %%
-df.loc[df["Kod"] != "", ["Kod", "Nazwa", "Ects", "WYK", "CWI", "LAB", "PRO", "W1", "W2", "W3", "W4", "U1", "U2", "U3", "U4", "K1", "K2", "K3", "K4"]].to_csv("output.csv", index=False, header=False)
+df.loc[df["Kod"] != "", [*main_cols, *effect_columns]].to_csv("output.csv", index=False, header=False)
 # %%
