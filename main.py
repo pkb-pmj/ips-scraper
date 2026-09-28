@@ -8,7 +8,7 @@ import pdfplumber
 playwright = await async_playwright().start()
 # Use playwright.chromium, playwright.firefox or playwright.webkit
 # Pass headless=False to launch() to see the browser UI
-browser = await playwright.firefox.launch(headless=False)
+browser = await playwright.chromium.launch(headless=False)
 page = await browser.new_page()
 
 # %%
