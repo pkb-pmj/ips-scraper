@@ -130,7 +130,7 @@ def expand_effects(effects: set[str]):
     if not isinstance(effects, set):
         return [""] * 12
     
-    effects = [e.split("_", 1)[1] for e in effects]
+    effects = set(e.replace(" ", "").split("_", 1)[1].strip() for e in effects)
 
     w, u, k = [], [], []
     for e in effects:
