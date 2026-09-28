@@ -108,7 +108,7 @@ def extract_effects_from_syllabus(code: str):
     filepath = "./downloads/sylabus/" + code + ".pdf"
     with pdfplumber.open(filepath) as pdf:
         tables = [t for p in pdf.pages for t in p.extract_tables()]
-    effects = set(e.strip() for t in tables for r in t if r[0] == "Powiązane kierunkowe efekty uczenia się" for e in r[-1].split(","))
+    effects = set(e.strip() for t in tables for r in t if r[0] == "Powiązane kierunkowe efekty uczenia się" for e in r[1].split(","))
     return effects
 
 # %%
