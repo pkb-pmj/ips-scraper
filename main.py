@@ -61,7 +61,7 @@ with open(filepath, "r", encoding="windows-1250") as f:
 lines = text.split(";\n")
 
 # %%
-breakpoints = [i for i, l in enumerate(lines) if l.endswith('\n')]
+breakpoints = [i for i, l in enumerate(lines) if l.endswith('\n') or l.startswith("Sem:") or l.startswith("RAZEM") or l.startswith(";;RAZEM MODUŁ")]
 blocks = [lines[i + 1:j] for i, j in zip(breakpoints, breakpoints[1:] + [len(lines)])]
 headers = [lines[i] for i in breakpoints]
 course = lines[0].strip()
